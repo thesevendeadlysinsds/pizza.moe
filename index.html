@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizza.moe</title>
+    <link rel="icon" id="siteFavicon" href="pizza.png">
+</head>
+<body>
+    <h2 id="siteName">Pizza.moe</h2>
+    <p>Pour info il faut cliquer le boutton marche/arret pour que votre musique marche et que votre image puisse zoomer et dézoomer</p>
+    <center>
+        <label for="hand-select">Choisir une réponse?</label>
+        <select name="hand" id="hand-select" required>
+            <option value="">Choisissez une réponse</option>
+            <option value="pizza">Pizza</option>
+            <option value="nsi">nsi</option>
+            <option value="personnalisation">personnaliser</option>
+        </select>
+        <div id="customOptions" style="display: none;">
+            <br><br><br><br><br>
+            <label for="userTitle">Titre du Site:</label>
+            <input type="text" id="userTitle">
+            <br><br>
+            <label for="userIcon">Sélectionner une image pour l'icône:</label><br><br>
+            <center><input type="file" id="userIcon" accept="image/*"></center><br>
+            <button id="applyButton">Appliquer</button>
+        </div>
+        <br><br><br><br><br><br><br><br>
+        <button class="pizza" id="myButton"><img src="pizza.png" class="pizzza"></button>
+        <br><br><br><br><br><br><br><br><br>
+        <input type="file" id="audioInput" accept=".mp3, .ogg, .wav"><br>
+        <audio id="myAudio" controls></audio><br>
+        <input type="range" id="speedRange" min="1" max="100" value="10">
+    </center>
+    <button id="toggleButton">Marche/Arrêt</button>
+</body>
+</html>
+<style>
+    #customOptions {
+        margin-top: -70px;
+    }
+    p {
+        margin-top: -40px;
+        text-align: center;
+    }
+    #applyButton {
+        margin-left: 150px;
+    }
+    .pizzza {
+        width: 100px;
+        margin-left: 1px;
+    }
+    .pizza {
+        width: 115px;
+        transition: transform 0.5s;
+        cursor: default;
+        margin-left: -50px;
+    }
+    .pizza.zoomed {
+        transform: scale(3);
+    }
+    button {
+        margin-left: 900px;
+        cursor: pointer;
+        background-color: yellow;
+    }
+    body {
+        background-color: yellow;
+    }
+    h2 {
+        text-align: center;
+        font-size: 50pt;
+    }
+</style>
+<script>
+var myButton = document.getElementById('myButton');
+var toggleButton = document.getElementById('toggleButton');
+var myAudio = document.getElementById('myAudio');
+var audioInput = document.getElementById('audioInput');
+var speedRange = document.getElementById('speedRange');
+var handSelect = document.getElementById('hand-select');
+var siteName = document.getElementById('siteName');
+var siteFavicon = document.getElementById('siteFavicon');
+
+var iconMap = {
+    pizza: { icon: 'pizza.png', name: 'Pizza.moe', title: 'Pizza.moe', favicon: 'pizza.png' },
+    nsi: { icon: 'nsi.ico', name: 'nsi.moe', title: 'nsi.moe', favicon: 'nsi.ico' }
+};
+
+function toggleZoom() {
+    myButton.classList.toggle('zoomed');
+}
+
+function startToggle() {
+    var speed = 500 - parseInt(speedRange.value * 5);
+    intervalId = setInterval(toggleZoom, speed);
+}
+
+function stopToggle() {
+    clearInterval(intervalId);
+    myButton.classList.remove('zoomed');
+}
+
+function changeIconAndText(iconInfo) {
+    myButton.innerHTML = `<img src="${iconInfo.icon}" class="pizzza">`;
+    siteName.textContent = iconInfo.name;
+    document.title = iconInfo.title;
+    siteFavicon.href = iconInfo.favicon; // Changer l'icône du site
+}
+
+toggleButton.addEventListener('click', function() {
+    if (myAudio.paused) {
+        myAudio.play();
+        startToggle();
+    } else {
+        myAudio.pause();
+        stopToggle();
+    }
+});
+
+myAudio.addEventListener('pause', function() {
+    stopToggle();
+});
+
+audioInput.addEventListener('change', function(event) {
+    var file = event.target.files[0];
+    var blobURL = URL.createObjectURL(file);
+    myAudio.src = blobURL;
+    myAudio.load();
+});
+
+speedRange.addEventListener('input', function() {
+    stopToggle();
+    startToggle();
+});
+
+handSelect.addEventListener('change', function(event) {
+    var selectedValue = event.target.value;
+    if (selectedValue in iconMap) {
+        changeIconAndText(iconMap[selectedValue]);
+    }
+});
+var handSelect = document.getElementById('hand-select');
+var customOptions = document.getElementById('customOptions');
+
+handSelect.addEventListener('change', function(event) {
+    var selectedValue = event.target.value;
+
+    if (selectedValue === 'personnalisation') {
+        customOptions.style.display = 'block';
+    } else {
+        customOptions.style.display = 'none';
+    }
+
+    // Mettre à jour le contenu personnalisé lorsque nécessaire
+    if (selectedValue in iconMap) {
+        changeIconAndText(iconMap[selectedValue]);
+    } else if (selectedValue === 'personnalisation') {
+        var userTitle = document.getElementById('userTitle').value;
+        var userIcon = document.getElementById('userIcon').value;
+        var userName = document.getElementById('userName').value;
+
+        var customInfo = {
+            icon: userIcon,
+            name: userName,
+            title: userTitle,
+            favicon: userIcon
+        };
+
+        changeIconAndText(customInfo);
+    }
+});
+var applyButton = document.getElementById('applyButton');
+applyButton.addEventListener('click', function() {
+    var userTitle = document.getElementById('userTitle').value;
+    var userIcon = document.getElementById('userIcon').files[0];
+    var siteName = document.getElementById('siteName'); // Sélectionne le h2
+
+    var customInfo = {
+        icon: userIcon ? URL.createObjectURL(userIcon) : '', // Convertit le fichier en URL
+        name: "Personnalisé", // Nom par défaut pour la personnalisation
+        title: userTitle,
+        favicon: userIcon ? URL.createObjectURL(userIcon) : '' // Convertit le fichier en URL
+    };
+
+    changeIconAndText(customInfo);
+    siteName.textContent = userTitle + ".moe"; // Met à jour le titre du site avec le titre personnalisé suivi de ".moe"
+    document.title = userTitle + ".moe"; // Met à jour le titre de la page avec le titre personnalisé suivi de ".moe"
+});
+</script>
